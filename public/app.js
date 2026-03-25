@@ -23,23 +23,18 @@ function renderQuestion(payload) {
   currentQuestion = payload;
   card.classList.remove('hidden');
   resetCard();
-
   questionEl.textContent = payload.question;
 
   payload.choices.forEach((choice, index) => {
     const btn = document.createElement('button');
     btn.className = 'answer-btn';
     btn.textContent = choice;
-    btn.addEventListener('click', () => handleAnswer(index, btn));
+    btn.addEventListener('click', () => handleAnswer(index));
     answersEl.appendChild(btn);
   });
-
-  if (payload.source === 'fallback') {
-    feedbackEl.textContent = 'Using local fallback questions (set OPENAI_API_KEY for AI-generated trivia).';
-  }
 }
 
-function handleAnswer(selectedIndex, selectedButton) {
+function handleAnswer(selectedIndex) {
   if (!currentQuestion) return;
 
   const isCorrect = selectedIndex === currentQuestion.answerIndex;
@@ -48,7 +43,7 @@ function handleAnswer(selectedIndex, selectedButton) {
   answersEl.querySelectorAll('button').forEach((button, index) => {
     if (index === currentQuestion.answerIndex) {
       button.classList.add('correct');
-    } else if (button === selectedButton) {
+    } else {
       button.classList.add('wrong');
     }
   });
