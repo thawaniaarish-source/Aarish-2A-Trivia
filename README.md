@@ -1,6 +1,6 @@
-# Trivia App (Local)
+# Trivia App (Static)
 
-A simple local trivia app for learning prompt-like structuring, basic web app development, and immediate UI feedback.
+A fully static trivia app for learning basic web app development and immediate UI feedback.
 
 ## Features
 
@@ -8,11 +8,17 @@ A simple local trivia app for learning prompt-like structuring, basic web app de
 - 15 built-in questions per category.
 - One question shown at a time.
 - Click an answer to instantly see:
-  - correct answer in green
+  - the correct answer in green
   - all incorrect answers in red
   - a short explanation
+- No backend/API required.
 
-## Local run
+## Run locally
+
+Because the app is static, you can run it in either of these ways:
+
+1. Open `public/index.html` directly in your browser.
+2. Or use any static file server, for example:
 
 ```bash
 npm start
