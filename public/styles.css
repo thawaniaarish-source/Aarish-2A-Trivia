@@ -12,7 +12,7 @@ body {
 }
 
 .app {
-  width: min(92vw, 680px);
+  width: min(92vw, 720px);
   background: #ffffff;
   color: #111827;
   border-radius: 16px;
@@ -25,11 +25,43 @@ body {
   color: #4b5563;
 }
 
+.auth-card {
+  margin-top: 1rem;
+}
+
+.auth-subtitle {
+  margin-top: -0.4rem;
+  color: #4b5563;
+}
+
+.auth-form,
 .controls {
   display: grid;
   gap: 0.6rem;
 }
 
+.status-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.status-pill {
+  margin: 0;
+  padding: 0.45rem 0.6rem;
+  border-radius: 10px;
+  background: #eef2ff;
+  color: #312e81;
+  text-align: center;
+  font-weight: 600;
+}
+
+.status-pill.timer {
+  background: #fff7ed;
+  color: #9a3412;
+}
+
+input,
 select,
 button {
   font: inherit;
@@ -95,4 +127,10 @@ button:hover {
 
 .feedback.wrong {
   color: #991b1b;
+}
+
+@media (max-width: 720px) {
+  .status-row {
+    grid-template-columns: 1fr;
+  }
 }
