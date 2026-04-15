@@ -3,59 +3,61 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Arcade Clash</title>
+    <title>Trivia App</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <main class="game-shell">
-      <h1>Arcade Clash</h1>
-      <p class="subtitle">A fast 1v1 fighting game inspired by classic arena fighters.</p>
+    <main class="app">
+      <h1>Trivia App</h1>
+      <p class="subtitle">Pick a category, pick a difficulty, and answer one question at a time.</p>
+      <p class="mode-link"><a href="fighter.html">Want the fighting game version? Open Arcade Clash.</a></p>
 
-      <section class="hud" aria-live="polite">
-        <div class="player-ui">
-          <p class="label">Player 1</p>
-          <div class="health-track"><div id="p1Health" class="health-fill p1"></div></div>
-          <p id="p1Rounds" class="rounds">Rounds: 0</p>
-        </div>
+      <section id="loginSection" class="card auth-card">
+        <h2>Login</h2>
+        <p class="auth-subtitle">Enter your name and email to start playing.</p>
+        <form id="loginForm" class="auth-form">
+          <label for="nameInput">Name</label>
+          <input id="nameInput" type="text" placeholder="Your name" required />
 
-        <div class="center-ui">
-          <p id="roundText" class="round-text">Round 1</p>
-          <p id="timerText" class="timer">60</p>
-          <button id="restartBtn" type="button">Restart Match</button>
-        </div>
+          <label for="emailInput">Email</label>
+          <input id="emailInput" type="email" placeholder="you@example.com" required />
 
-        <div class="player-ui right">
-          <p class="label">Player 2</p>
-          <div class="health-track"><div id="p2Health" class="health-fill p2"></div></div>
-          <p id="p2Rounds" class="rounds">Rounds: 0</p>
-        </div>
+          <button type="submit" id="startBtn">Start Trivia</button>
+        </form>
+        <p id="loginFeedback" class="feedback"></p>
       </section>
 
-      <canvas id="arena" width="980" height="520" role="img" aria-label="2D fighting arena"></canvas>
+      <section id="gameSection" class="hidden">
+        <section class="controls">
+          <div class="status-row">
+            <p id="welcomeText" class="status-pill">Welcome!</p>
+            <p id="scoreText" class="status-pill">Score: 0</p>
+            <p id="timerText" class="status-pill timer">Time left: 30s</p>
+          </div>
 
-      <section id="message" class="message">Fight!</section>
+          <label for="topic">Choose topic</label>
+          <select id="topic">
+            <option value="science">Science</option>
+            <option value="history">History</option>
+            <option value="sports">Sports</option>
+            <option value="geography">Geography</option>
+          </select>
 
-      <section class="controls">
-        <article>
-          <h2>Player 1 Controls</h2>
-          <ul>
-            <li>Move: A / D</li>
-            <li>Jump: W</li>
-            <li>Punch: F</li>
-            <li>Kick: G</li>
-            <li>Block: H</li>
-          </ul>
-        </article>
-        <article>
-          <h2>Player 2 Controls</h2>
-          <ul>
-            <li>Move: ← / →</li>
-            <li>Jump: ↑</li>
-            <li>Punch: K</li>
-            <li>Kick: L</li>
-            <li>Block: ;</li>
-          </ul>
-        </article>
+          <label for="difficulty">Choose difficulty</label>
+          <select id="difficulty">
+            <option value="easy">Easy (30s)</option>
+            <option value="medium">Medium (45s)</option>
+            <option value="hard">Hard (60s)</option>
+          </select>
+
+          <button id="generateBtn">Generate Trivia Question</button>
+        </section>
+
+        <section id="card" class="card hidden" aria-live="polite">
+          <h2 id="question"></h2>
+          <div id="answers" class="answers"></div>
+          <p id="feedback" class="feedback"></p>
+        </section>
       </section>
     </main>
 

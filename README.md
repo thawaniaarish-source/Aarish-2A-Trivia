@@ -1,29 +1,16 @@
-# Arcade Clash (Browser Fighting Game)
+# Trivia App + Arcade Clash (Static)
 
-A lightweight 2D fighting game you can run locally in the browser. It is inspired by classic head-to-head fighters and built with plain HTML/CSS/JavaScript.
+This project now keeps the original **Trivia App** as the main experience and provides the fighting prototype as a **separate page/code path**.
 
-## Gameplay
+## Included experiences
 
-- Local 2-player versus match on one keyboard.
-- Health bars, round timer, and best-of-3 rounds.
-- Punch, kick, jump, move, and block mechanics.
-- Knockout wins and time-based round decisions.
-
-## Controls
-
-### Player 1
-- Move: `A` / `D`
-- Jump: `W`
-- Punch: `F`
-- Kick: `G`
-- Block: `H`
-
-### Player 2
-- Move: `←` / `→`
-- Jump: `↑`
-- Punch: `K`
-- Kick: `L`
-- Block: `;`
+- `http://localhost:3000/` → **Trivia App**
+  - Login with name/email
+  - Category + difficulty selection
+  - Timed single-question rounds with score tracking
+- `http://localhost:3000/fighter.html` → **Arcade Clash**
+  - Local 2-player keyboard fighting game
+  - Health bars, round timer, best-of-3 flow
 
 ## Run locally
 
@@ -31,4 +18,6 @@ A lightweight 2D fighting game you can run locally in the browser. It is inspire
 npm start
 ```
 
-Then open `http://localhost:3000`.
+Then open one of:
+- `http://localhost:3000/`
+- `http://localhost:3000/fighter.html`
