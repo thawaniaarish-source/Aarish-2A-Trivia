@@ -31,6 +31,9 @@ function createFighter(config) {
     color: config.color,
     outline: config.outline,
     face: config.face,
+    hair: config.hair,
+    top: config.top,
+    pants: config.pants,
     speed: 235,
     velocityX: 0,
     velocityY: 0,
@@ -56,6 +59,9 @@ const p1 = createFighter({
   color: '#4a6a8a',
   outline: '#23384d',
   face: '#d8c1a7',
+  hair: '#33241c',
+  top: '#3a5572',
+  pants: '#2c3138',
   facing: 1,
   controls: {
     left: 'KeyA',
@@ -73,6 +79,9 @@ const p2 = createFighter({
   color: '#7f4f3f',
   outline: '#4f2d22',
   face: '#d9b69a',
+  hair: '#251811',
+  top: '#6d3f31',
+  pants: '#2b2e34',
   facing: -1,
   controls: {
     left: 'ArrowLeft',
@@ -220,40 +229,80 @@ function drawBackground() {
 function drawFighter(fighter) {
   ctx.save();
 
-  const drawX = fighter.x;
-  const drawY = fighter.y - fighter.height;
+  const centerX = fighter.x + fighter.width / 2;
+  const baseY = fighter.y;
+  const headRadius = 10;
+  const facing = fighter.facing;
 
-  ctx.fillStyle = fighter.color;
-  ctx.fillRect(drawX + 6, drawY + 24, fighter.width - 12, 52);
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.16)';
+  ctx.beginPath();
+  ctx.ellipse(centerX, baseY + 3, 15, 5, 0, 0, Math.PI * 2);
+  ctx.fill();
 
-  ctx.fillStyle = '#252525';
-  ctx.fillRect(drawX + 6, drawY + 76, 14, 30);
-  ctx.fillRect(drawX + fighter.width - 20, drawY + 76, 14, 30);
+  ctx.strokeStyle = fighter.pants;
+  ctx.lineWidth = 6;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(centerX - 5, baseY - 30);
+  ctx.lineTo(centerX - 7, baseY - 2);
+  ctx.moveTo(centerX + 5, baseY - 30);
+  ctx.lineTo(centerX + 7, baseY - 2);
+  ctx.stroke();
+
+  ctx.strokeStyle = fighter.top;
+  ctx.lineWidth = 10;
+  ctx.beginPath();
+  ctx.moveTo(centerX, baseY - 72);
+  ctx.lineTo(centerX, baseY - 30);
+  ctx.stroke();
+
+  const guardLift = fighter.isBlocking ? -6 : 0;
+  const leadArmReach = fighter.hitStun > 0 ? 5 : 14;
+  ctx.strokeStyle = fighter.top;
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.moveTo(centerX - (7 * facing), baseY - 62);
+  ctx.lineTo(centerX - (16 * facing), baseY - 42 + guardLift);
+  ctx.moveTo(centerX + (7 * facing), baseY - 62);
+  ctx.lineTo(centerX + (leadArmReach * facing), baseY - 40 + guardLift);
+  ctx.stroke();
+
+  ctx.strokeStyle = fighter.face;
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(centerX, baseY - 82);
+  ctx.lineTo(centerX, baseY - 76);
+  ctx.stroke();
 
   ctx.fillStyle = fighter.face;
-  ctx.fillRect(drawX + 11, drawY + 2, fighter.width - 22, 22);
+  ctx.beginPath();
+  ctx.arc(centerX, baseY - 93, headRadius, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = fighter.hair;
+  ctx.beginPath();
+  ctx.arc(centerX, baseY - 96, headRadius, Math.PI, 2 * Math.PI);
+  ctx.fill();
+
+  ctx.fillStyle = '#1d1d1d';
+  const eyeOffsetX = 3 * facing;
+  ctx.beginPath();
+  ctx.arc(centerX + eyeOffsetX, baseY - 94, 1.3, 0, Math.PI * 2);
+  ctx.arc(centerX - (2 * facing), baseY - 94, 1.1, 0, Math.PI * 2);
+  ctx.fill();
 
   ctx.strokeStyle = fighter.outline;
-  ctx.lineWidth = 2;
-  ctx.strokeRect(drawX + 6, drawY + 24, fighter.width - 12, 52);
-  ctx.strokeRect(drawX + 11, drawY + 2, fighter.width - 22, 22);
-
-  ctx.fillStyle = '#1f1f1f';
-  const leadArmX = fighter.facing === 1 ? drawX + fighter.width - 10 : drawX - 4;
-  const rearArmX = fighter.facing === 1 ? drawX + 2 : drawX + fighter.width - 12;
-  ctx.fillRect(leadArmX, drawY + 32, 10, 26);
-  ctx.fillRect(rearArmX, drawY + 32, 10, 26);
-
-  if (fighter.isBlocking) {
-    ctx.fillStyle = 'rgba(80, 145, 190, 0.35)';
-    const guardX = fighter.facing === 1 ? drawX + fighter.width - 16 : drawX + 2;
-    ctx.fillRect(guardX, drawY + 22, 14, 44);
-  }
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.arc(centerX, baseY - 93, headRadius, 0, Math.PI * 2);
+  ctx.stroke();
 
   if (fighter.hitStun > 0) {
     ctx.strokeStyle = 'rgba(180, 40, 40, 0.65)';
-    ctx.lineWidth = 3;
-    ctx.strokeRect(drawX + 3, drawY - 1, fighter.width - 6, fighter.height - 2);
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(centerX, baseY - 93, headRadius + 4, 0, Math.PI * 2);
+    ctx.stroke();
   }
 
   ctx.restore();
