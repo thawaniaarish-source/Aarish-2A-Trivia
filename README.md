@@ -1,33 +1,23 @@
-# Trivia App (Static)
+# Trivia App + Arcade Clash (Static)
 
-A fully static trivia app for learning basic web app development and immediate UI feedback.
+This project now keeps the original **Trivia App** as the main experience and provides the fighting prototype as a **separate page/code path**.
 
-## Features
+## Included experiences
 
-- Login form with **name** and **email** before gameplay.
-- Choose a category: Science, History, Sports, or Geography.
-- Choose a difficulty level:
-  - **Easy**: easier questions, **30 seconds** per question
-  - **Medium**: tougher than easy, **45 seconds** per question
-  - **Hard**: tougher than medium, **60 seconds** per question
-- 15 built-in questions per category, split by difficulty buckets.
-- One question shown at a time.
-- **Score counter** that increases by 1 only when the selected answer is correct.
-- Click an answer to instantly see:
-  - the correct answer in green
-  - all incorrect answers in red
-  - a short explanation
-- No backend/API required.
+- `http://localhost:3000/` → **Trivia App**
+  - Login with name/email
+  - Category + difficulty selection
+  - Timed single-question rounds with score tracking
+- `http://localhost:3000/fighter.html` → **Arcade Clash**
+  - Local 2-player keyboard fighting game
+  - Health bars, round timer, best-of-3 flow
 
 ## Run locally
-
-Because the app is static, you can run it in either of these ways:
-
-1. Open `public/index.html` directly in your browser.
-2. Or use any static file server, for example:
 
 ```bash
 npm start
 ```
 
-Then open `http://localhost:3000`.
+Then open one of:
+- `http://localhost:3000/`
+- `http://localhost:3000/fighter.html`
