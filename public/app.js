@@ -1,261 +1,392 @@
-const loginSection = document.querySelector('#loginSection');
-const gameSection = document.querySelector('#gameSection');
-const loginForm = document.querySelector('#loginForm');
-const nameInput = document.querySelector('#nameInput');
-const emailInput = document.querySelector('#emailInput');
-const loginFeedbackEl = document.querySelector('#loginFeedback');
+const canvas = document.querySelector('#arena');
+const ctx = canvas.getContext('2d');
 
-const welcomeText = document.querySelector('#welcomeText');
-const scoreText = document.querySelector('#scoreText');
-const timerText = document.querySelector('#timerText');
-const topicSelect = document.querySelector('#topic');
-const difficultySelect = document.querySelector('#difficulty');
-const generateBtn = document.querySelector('#generateBtn');
-const card = document.querySelector('#card');
-const questionEl = document.querySelector('#question');
-const answersEl = document.querySelector('#answers');
-const feedbackEl = document.querySelector('#feedback');
+const p1HealthEl = document.querySelector('#p1Health');
+const p2HealthEl = document.querySelector('#p2Health');
+const p1RoundsEl = document.querySelector('#p1Rounds');
+const p2RoundsEl = document.querySelector('#p2Rounds');
+const timerTextEl = document.querySelector('#timerText');
+const roundTextEl = document.querySelector('#roundText');
+const messageEl = document.querySelector('#message');
+const restartBtn = document.querySelector('#restartBtn');
 
-const DIFFICULTY_TIME_LIMITS = {
-  easy: 30,
-  medium: 45,
-  hard: 60
-};
+const GROUND_Y = canvas.height - 70;
+const ROUND_TIME = 60;
+const MAX_ROUNDS_TO_WIN = 2;
 
-const DIFFICULTY_BUCKETS = {
-  easy: [0, 5],
-  medium: [5, 10],
-  hard: [10, 15]
-};
+const keys = {};
+let lastTick = performance.now();
+let roundTimer = ROUND_TIME;
+let roundSecondsAccumulator = 0;
+let roundOver = false;
+let gameOver = false;
 
-const questionBank = {
-  science: [
-    { question: 'What planet is known as the Red Planet?', choices: ['Venus', 'Mars', 'Jupiter', 'Mercury'], answerIndex: 1, explanation: 'Mars appears red because of iron oxide on its surface.' },
-    { question: 'What is the chemical symbol for water?', choices: ['O2', 'H2O', 'CO2', 'NaCl'], answerIndex: 1, explanation: 'Water is made of hydrogen and oxygen: H2O.' },
-    { question: 'What gas do humans breathe in to survive?', choices: ['Nitrogen', 'Hydrogen', 'Oxygen', 'Helium'], answerIndex: 2, explanation: 'Humans need oxygen for cellular respiration.' },
-    { question: 'How many bones are in the adult human body?', choices: ['206', '198', '300', '151'], answerIndex: 0, explanation: 'Most adults have 206 bones.' },
-    { question: 'Which organ pumps blood through the body?', choices: ['Lungs', 'Liver', 'Heart', 'Kidney'], answerIndex: 2, explanation: 'The heart pumps blood throughout the body.' },
-    { question: 'What force keeps planets orbiting the sun?', choices: ['Magnetism', 'Gravity', 'Friction', 'Electricity'], answerIndex: 1, explanation: 'Gravity keeps planets in orbit around the sun.' },
-    { question: 'What is Earth’s natural satellite?', choices: ['Mars', 'Venus', 'The Moon', 'Europa'], answerIndex: 2, explanation: 'Earth has one natural satellite: the Moon.' },
-    { question: 'What is the boiling point of water at sea level?', choices: ['90°C', '80°C', '100°C', '120°C'], answerIndex: 2, explanation: 'At 1 atmosphere, water boils at 100°C.' },
-    { question: 'What process do plants use to make food?', choices: ['Digestion', 'Respiration', 'Photosynthesis', 'Fermentation'], answerIndex: 2, explanation: 'Plants make glucose via photosynthesis.' },
-    { question: 'Which blood cells help fight infection?', choices: ['Red blood cells', 'White blood cells', 'Platelets', 'Plasma cells'], answerIndex: 1, explanation: 'White blood cells are part of the immune system.' },
-    { question: 'Which part of the cell contains genetic material?', choices: ['Nucleus', 'Ribosome', 'Cell membrane', 'Cytoplasm'], answerIndex: 0, explanation: 'The nucleus stores DNA in most cells.' },
-    { question: 'What do bees collect from flowers?', choices: ['Pollen and nectar', 'Sand and water', 'Leaves and bark', 'Salt and sugar'], answerIndex: 0, explanation: 'Bees gather nectar and pollen for food and pollination.' },
-    { question: 'What is the nearest star to Earth?', choices: ['Sirius', 'Alpha Centauri', 'The Sun', 'Polaris'], answerIndex: 2, explanation: 'Our nearest star is the Sun.' },
-    { question: 'Which state of matter has a definite volume but no fixed shape?', choices: ['Solid', 'Liquid', 'Gas', 'Plasma'], answerIndex: 1, explanation: 'Liquids keep volume but take the shape of their container.' },
-    { question: 'What type of energy is stored in food?', choices: ['Nuclear energy', 'Chemical energy', 'Sound energy', 'Light energy'], answerIndex: 1, explanation: 'Food stores chemical energy in molecular bonds.' }
-  ],
-  history: [
-    { question: 'Who was the first President of the United States?', choices: ['Thomas Jefferson', 'George Washington', 'John Adams', 'James Madison'], answerIndex: 1, explanation: 'George Washington served as the first U.S. president.' },
-    { question: 'In what year did World War II end?', choices: ['1942', '1945', '1939', '1950'], answerIndex: 1, explanation: 'World War II ended in 1945.' },
-    { question: 'Which ancient civilization built the pyramids at Giza?', choices: ['Romans', 'Greeks', 'Egyptians', 'Mayans'], answerIndex: 2, explanation: 'The ancient Egyptians built the Giza pyramids.' },
-    { question: 'Who wrote the Declaration of Independence?', choices: ['Benjamin Franklin', 'George Washington', 'Thomas Jefferson', 'John Hancock'], answerIndex: 2, explanation: 'Thomas Jefferson was the primary author.' },
-    { question: 'Which ship famously sank in 1912?', choices: ['Lusitania', 'Mayflower', 'Titanic', 'Bismarck'], answerIndex: 2, explanation: 'The RMS Titanic sank in April 1912.' },
-    { question: 'Who is credited with discovering America in 1492?', choices: ['Leif Erikson', 'Christopher Columbus', 'Ferdinand Magellan', 'Marco Polo'], answerIndex: 1, explanation: 'Columbus reached the Americas in 1492.' },
-    { question: 'What wall fell in 1989, symbolizing the end of the Cold War?', choices: ['Great Wall of China', 'Hadrian’s Wall', 'Berlin Wall', 'Wailing Wall'], answerIndex: 2, explanation: 'The Berlin Wall fell in November 1989.' },
-    { question: 'The Renaissance began in which country?', choices: ['France', 'Italy', 'England', 'Spain'], answerIndex: 1, explanation: 'The Renaissance started in Italy.' },
-    { question: 'In which year did the U.S. Civil War begin?', choices: ['1861', '1859', '1865', '1870'], answerIndex: 0, explanation: 'The Civil War began in 1861.' },
-    { question: 'Which civilization created Machu Picchu?', choices: ['Aztec', 'Inca', 'Maya', 'Olmec'], answerIndex: 1, explanation: 'Machu Picchu was built by the Inca.' },
-    { question: 'Which empire was ruled by Julius Caesar?', choices: ['Greek Empire', 'Roman Republic', 'Ottoman Empire', 'Persian Empire'], answerIndex: 1, explanation: 'Julius Caesar was a leader in the Roman Republic.' },
-    { question: 'Who was known as the Maid of Orléans?', choices: ['Marie Curie', 'Joan of Arc', 'Catherine the Great', 'Queen Elizabeth I'], answerIndex: 1, explanation: 'Joan of Arc is known as the Maid of Orléans.' },
-    { question: 'What was the name of the trade route linking China and the Mediterranean?', choices: ['Spice Route', 'Silk Road', 'Amber Road', 'Royal Road'], answerIndex: 1, explanation: 'The Silk Road connected East and West trade.' },
-    { question: 'Who was the British prime minister during most of World War II?', choices: ['Neville Chamberlain', 'Winston Churchill', 'Clement Attlee', 'Margaret Thatcher'], answerIndex: 1, explanation: 'Winston Churchill led Britain through most of WWII.' },
-    { question: 'Who was the first woman to fly solo across the Atlantic Ocean?', choices: ['Sally Ride', 'Amelia Earhart', 'Valentina Tereshkova', 'Bessie Coleman'], answerIndex: 1, explanation: 'Amelia Earhart completed the solo flight in 1932.' }
-  ],
-  sports: [
-    { question: 'How many players are on a soccer team on the field at one time?', choices: ['9', '10', '11', '12'], answerIndex: 2, explanation: 'Each soccer team fields 11 players.' },
-    { question: 'How many points is a touchdown worth in American football?', choices: ['3', '6', '7', '2'], answerIndex: 1, explanation: 'A touchdown is worth 6 points before the extra attempt.' },
-    { question: 'How many bases are there on a baseball field?', choices: ['3', '4', '5', '6'], answerIndex: 1, explanation: 'There are 4 bases: first, second, third, and home.' },
-    { question: 'In basketball, how many points is a free throw worth?', choices: ['1', '2', '3', '4'], answerIndex: 0, explanation: 'A made free throw is worth 1 point.' },
-    { question: 'How many rings are on the Olympic flag?', choices: ['4', '5', '6', '7'], answerIndex: 1, explanation: 'The Olympic flag has 5 interlocking rings.' },
-    { question: 'Which sport uses a shuttlecock?', choices: ['Tennis', 'Squash', 'Badminton', 'Pickleball'], answerIndex: 2, explanation: 'Badminton is played with a shuttlecock.' },
-    { question: 'What country hosts the Tour de France?', choices: ['Spain', 'Italy', 'France', 'Belgium'], answerIndex: 2, explanation: 'The Tour de France is held primarily in France.' },
-    { question: 'In tennis, what is a score of zero called?', choices: ['Love', 'Nil', 'Blank', 'Zero'], answerIndex: 0, explanation: 'Zero points in tennis is called “love.”' },
-    { question: 'How long is an Olympic swimming pool?', choices: ['25 meters', '50 meters', '75 meters', '100 meters'], answerIndex: 1, explanation: 'Olympic pools are 50 meters long.' },
-    { question: 'In volleyball, how many players are on each side of the court?', choices: ['5', '6', '7', '8'], answerIndex: 1, explanation: 'Indoor volleyball has 6 players per side.' },
-    { question: 'What is the maximum score in a single frame of ten-pin bowling?', choices: ['20', '30', '40', '10'], answerIndex: 1, explanation: 'A strike followed by two strikes totals 30 in one frame.' },
-    { question: 'Which sport features the terms “checkmate” and “stalemate”?', choices: ['Checkers', 'Go', 'Chess', 'Fencing'], answerIndex: 2, explanation: 'Those terms are from chess.' },
-    { question: 'In golf, what is one stroke under par called?', choices: ['Bogey', 'Eagle', 'Birdie', 'Albatross'], answerIndex: 2, explanation: 'One under par is a birdie.' },
-    { question: 'Which country invented judo?', choices: ['China', 'Korea', 'Japan', 'Thailand'], answerIndex: 2, explanation: 'Judo was founded in Japan by Jigoro Kano.' },
-    { question: 'What piece of equipment is required in ice hockey to hit the puck?', choices: ['Bat', 'Racket', 'Club', 'Stick'], answerIndex: 3, explanation: 'Players use a hockey stick to move the puck.' }
-  ],
-  geography: [
-    { question: 'What is the largest ocean on Earth?', choices: ['Atlantic', 'Indian', 'Arctic', 'Pacific'], answerIndex: 3, explanation: 'The Pacific Ocean is the largest.' },
-    { question: 'What is the capital city of Japan?', choices: ['Kyoto', 'Osaka', 'Tokyo', 'Sapporo'], answerIndex: 2, explanation: 'Tokyo is the capital of Japan.' },
-    { question: 'Which continent is the Sahara Desert located on?', choices: ['Asia', 'Africa', 'Australia', 'South America'], answerIndex: 1, explanation: 'The Sahara spans much of North Africa.' },
-    { question: 'Which U.S. state is known as the “Sunshine State”?', choices: ['California', 'Arizona', 'Florida', 'Hawaii'], answerIndex: 2, explanation: 'Florida is nicknamed the Sunshine State.' },
-    { question: 'What is the capital of Canada?', choices: ['Toronto', 'Ottawa', 'Vancouver', 'Montreal'], answerIndex: 1, explanation: 'Ottawa is Canada’s capital city.' },
-    { question: 'Which country has the largest population as of 2026?', choices: ['China', 'India', 'United States', 'Indonesia'], answerIndex: 1, explanation: 'India remains the most populous country in 2026.' },
-    { question: 'What is the longest river in the world (commonly taught answer)?', choices: ['Amazon', 'Nile', 'Yangtze', 'Mississippi'], answerIndex: 1, explanation: 'Many school references list the Nile as longest.' },
-    { question: 'Mount Everest lies in which mountain range?', choices: ['Andes', 'Rockies', 'Himalayas', 'Alps'], answerIndex: 2, explanation: 'Everest is part of the Himalayas.' },
-    { question: 'Which country is both in Europe and Asia?', choices: ['Turkey', 'Portugal', 'Sweden', 'Ireland'], answerIndex: 0, explanation: 'Turkey spans both Europe and Asia.' },
-    { question: 'The Great Barrier Reef is off the coast of which country?', choices: ['Australia', 'New Zealand', 'Philippines', 'Fiji'], answerIndex: 0, explanation: 'It lies off northeastern Australia.' },
-    { question: 'Which line divides Earth into Northern and Southern Hemispheres?', choices: ['Prime Meridian', 'Tropic of Cancer', 'Equator', 'International Date Line'], answerIndex: 2, explanation: 'The Equator is the dividing line at 0° latitude.' },
-    { question: 'Which continent has the most countries?', choices: ['Europe', 'Africa', 'Asia', 'South America'], answerIndex: 1, explanation: 'Africa has the highest number of sovereign states.' },
-    { question: 'What is the smallest country in the world by area?', choices: ['Monaco', 'Nauru', 'Vatican City', 'San Marino'], answerIndex: 2, explanation: 'Vatican City is the smallest by land area.' },
-    { question: 'Which desert is the largest hot desert on Earth?', choices: ['Gobi', 'Kalahari', 'Sahara', 'Arabian'], answerIndex: 2, explanation: 'The Sahara is the largest hot desert.' },
-    { question: 'Which city is famously called the “City of Light”?', choices: ['Rome', 'Paris', 'Berlin', 'Madrid'], answerIndex: 1, explanation: 'Paris is often called the City of Light.' }
-  ]
-};
-
-let currentQuestion = null;
-let score = 0;
-let playerName = '';
-let timerId = null;
-let timeLeft = DIFFICULTY_TIME_LIMITS.easy;
-
-function resetCard() {
-  answersEl.innerHTML = '';
-  feedbackEl.textContent = '';
-  feedbackEl.className = 'feedback';
+function createFighter(config) {
+  return {
+    name: config.name,
+    x: config.x,
+    y: GROUND_Y,
+    width: 46,
+    height: 106,
+    color: config.color,
+    outline: config.outline,
+    face: config.face,
+    speed: 280,
+    velocityX: 0,
+    velocityY: 0,
+    jumpPower: 630,
+    gravity: 1650,
+    health: 100,
+    roundsWon: 0,
+    blockReduction: 0.45,
+    isBlocking: false,
+    facing: config.facing,
+    controls: config.controls,
+    attackCooldown: 0,
+    attackFlash: 0,
+    hitStun: 0,
+    wasAttackPressed: false,
+    wasKickPressed: false,
+    wasJumpPressed: false
+  };
 }
 
-function lockAnswers() {
-  answersEl.querySelectorAll('button').forEach((button) => {
-    button.disabled = true;
-  });
+const p1 = createFighter({
+  name: 'Player 1',
+  x: 180,
+  color: '#49f1a4',
+  outline: '#0a6f4b',
+  face: '#c0fff1',
+  facing: 1,
+  controls: {
+    left: 'KeyA',
+    right: 'KeyD',
+    jump: 'KeyW',
+    punch: 'KeyF',
+    kick: 'KeyG',
+    block: 'KeyH'
+  }
+});
+
+const p2 = createFighter({
+  name: 'Player 2',
+  x: canvas.width - 220,
+  color: '#ff7da7',
+  outline: '#8f2145',
+  face: '#ffe4ef',
+  facing: -1,
+  controls: {
+    left: 'ArrowLeft',
+    right: 'ArrowRight',
+    jump: 'ArrowUp',
+    punch: 'KeyK',
+    kick: 'KeyL',
+    block: 'Semicolon'
+  }
+});
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
 }
 
-function getQuestionsForSelection(topic, difficulty) {
-  const normalizedTopic = typeof topic === 'string' ? topic.toLowerCase() : 'science';
-  const topicKey = questionBank[normalizedTopic] ? normalizedTopic : 'science';
-  const difficultyKey = DIFFICULTY_BUCKETS[difficulty] ? difficulty : 'easy';
-  const [start, end] = DIFFICULTY_BUCKETS[difficultyKey];
-
-  return questionBank[topicKey].slice(start, end);
+function onGround(fighter) {
+  return fighter.y >= GROUND_Y;
 }
 
-function pickQuestion(topic, difficulty) {
-  const questions = getQuestionsForSelection(topic, difficulty);
-  return questions[Math.floor(Math.random() * questions.length)];
-}
+function attack(attacker, defender, attackType) {
+  if (attacker.attackCooldown > 0 || roundOver || gameOver || attacker.hitStun > 0) {
+    return;
+  }
 
-function getTimeLimitForDifficulty(difficulty) {
-  return DIFFICULTY_TIME_LIMITS[difficulty] || DIFFICULTY_TIME_LIMITS.easy;
-}
+  const isKick = attackType === 'kick';
+  const range = isKick ? 80 : 62;
+  const baseDamage = isKick ? 16 : 10;
+  const cooldown = isKick ? 0.58 : 0.32;
+  const verticalReach = isKick ? 70 : 58;
 
-function updateScoreText() {
-  scoreText.textContent = `Score: ${score}`;
-}
+  attacker.attackCooldown = cooldown;
+  attacker.attackFlash = isKick ? 0.18 : 0.12;
 
-function updateTimerText() {
-  timerText.textContent = `Time left: ${timeLeft}s`;
-}
+  const distanceX = Math.abs((attacker.x + attacker.width / 2) - (defender.x + defender.width / 2));
+  const distanceY = Math.abs((attacker.y - attacker.height / 2) - (defender.y - defender.height / 2));
+  const isInFront = attacker.facing === 1 ? defender.x > attacker.x : defender.x < attacker.x;
 
-function stopTimer() {
-  if (timerId) {
-    clearInterval(timerId);
-    timerId = null;
+  if (distanceX <= range && distanceY <= verticalReach && isInFront) {
+    const blockedDamage = Math.round(baseDamage * defender.blockReduction);
+    const damage = defender.isBlocking ? blockedDamage : baseDamage;
+
+    defender.health = clamp(defender.health - damage, 0, 100);
+    defender.hitStun = defender.isBlocking ? 0.08 : 0.16;
+
+    const push = defender.isBlocking ? 22 : 40;
+    defender.x += attacker.facing * push;
+    defender.x = clamp(defender.x, 0, canvas.width - defender.width);
+
+    if (defender.health <= 0) {
+      endRound(attacker, `${attacker.name} wins by knockout!`);
+    }
   }
 }
 
-function revealAnswerAndFeedback(isCorrect, timedOut = false) {
-  answersEl.querySelectorAll('button').forEach((button, index) => {
-    if (index === currentQuestion.answerIndex) {
-      button.classList.add('correct');
+function handleInput(fighter, enemy) {
+  fighter.isBlocking = Boolean(keys[fighter.controls.block]) && onGround(fighter) && fighter.hitStun <= 0;
+  const left = Boolean(keys[fighter.controls.left]);
+  const right = Boolean(keys[fighter.controls.right]);
+  const jumpPressed = Boolean(keys[fighter.controls.jump]);
+  const attackPressed = Boolean(keys[fighter.controls.punch]);
+  const kickPressed = Boolean(keys[fighter.controls.kick]);
+
+  if (fighter.hitStun <= 0) {
+    if (left === right || fighter.isBlocking) {
+      fighter.velocityX = 0;
     } else {
-      button.classList.add('wrong');
+      fighter.velocityX = left ? -fighter.speed : fighter.speed;
     }
-  });
 
-  feedbackEl.classList.add(isCorrect ? 'correct' : 'wrong');
+    if (jumpPressed && !fighter.wasJumpPressed && onGround(fighter) && !fighter.isBlocking) {
+      fighter.velocityY = -fighter.jumpPower;
+    }
 
-  if (timedOut) {
-    feedbackEl.textContent = `⏰ Time is up! ${currentQuestion.explanation}`;
+    if (attackPressed && !fighter.wasAttackPressed) {
+      attack(fighter, enemy, 'punch');
+    }
+
+    if (kickPressed && !fighter.wasKickPressed) {
+      attack(fighter, enemy, 'kick');
+    }
+  }
+
+  fighter.wasJumpPressed = jumpPressed;
+  fighter.wasAttackPressed = attackPressed;
+  fighter.wasKickPressed = kickPressed;
+}
+
+function updateFighter(fighter, dt) {
+  fighter.attackCooldown = Math.max(0, fighter.attackCooldown - dt);
+  fighter.attackFlash = Math.max(0, fighter.attackFlash - dt);
+  fighter.hitStun = Math.max(0, fighter.hitStun - dt);
+
+  fighter.velocityY += fighter.gravity * dt;
+  fighter.x += fighter.velocityX * dt;
+  fighter.y += fighter.velocityY * dt;
+
+  fighter.x = clamp(fighter.x, 0, canvas.width - fighter.width);
+
+  if (fighter.y > GROUND_Y) {
+    fighter.y = GROUND_Y;
+    fighter.velocityY = 0;
+  }
+}
+
+function updateFacing() {
+  const p1Center = p1.x + p1.width / 2;
+  const p2Center = p2.x + p2.width / 2;
+  if (p1Center < p2Center) {
+    p1.facing = 1;
+    p2.facing = -1;
+  } else {
+    p1.facing = -1;
+    p2.facing = 1;
+  }
+}
+
+function updateHud() {
+  p1HealthEl.style.width = `${p1.health}%`;
+  p2HealthEl.style.width = `${p2.health}%`;
+  p1RoundsEl.textContent = `Rounds: ${p1.roundsWon}`;
+  p2RoundsEl.textContent = `Rounds: ${p2.roundsWon}`;
+  timerTextEl.textContent = String(Math.max(0, Math.ceil(roundTimer)));
+}
+
+function drawBackground() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  gradient.addColorStop(0, '#36104e');
+  gradient.addColorStop(0.55, '#201138');
+  gradient.addColorStop(1, '#110b1f');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = 'rgba(208, 162, 255, 0.08)';
+  for (let i = 0; i < 14; i += 1) {
+    ctx.fillRect(i * 84, 35 + (i % 2) * 12, 56, 150);
+  }
+
+  ctx.fillStyle = '#2e2540';
+  ctx.fillRect(0, GROUND_Y + 106, canvas.width, canvas.height - (GROUND_Y + 106));
+
+  ctx.fillStyle = '#564466';
+  ctx.fillRect(0, GROUND_Y + 102, canvas.width, 6);
+}
+
+function drawFighter(fighter) {
+  ctx.save();
+
+  const drawX = fighter.x;
+  const drawY = fighter.y - fighter.height;
+
+  ctx.shadowBlur = fighter.attackFlash > 0 ? 18 : 0;
+  ctx.shadowColor = fighter.attackFlash > 0 ? '#ffd369' : 'transparent';
+
+  ctx.fillStyle = fighter.color;
+  ctx.fillRect(drawX, drawY + 22, fighter.width, fighter.height - 22);
+
+  ctx.fillStyle = fighter.face;
+  ctx.fillRect(drawX + 8, drawY, fighter.width - 16, 24);
+
+  ctx.strokeStyle = fighter.outline;
+  ctx.lineWidth = 3;
+  ctx.strokeRect(drawX, drawY + 22, fighter.width, fighter.height - 22);
+  ctx.strokeRect(drawX + 8, drawY, fighter.width - 16, 24);
+
+  if (fighter.isBlocking) {
+    ctx.fillStyle = 'rgba(130, 205, 255, 0.45)';
+    const shieldX = fighter.facing === 1 ? drawX + fighter.width - 4 : drawX - 14;
+    ctx.fillRect(shieldX, drawY + 22, 14, 56);
+  }
+
+  if (fighter.hitStun > 0) {
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.fillRect(drawX - 2, drawY - 2, fighter.width + 4, fighter.height + 4);
+  }
+
+  ctx.restore();
+}
+
+function draw() {
+  drawBackground();
+  drawFighter(p1);
+  drawFighter(p2);
+}
+
+function resetFighters() {
+  p1.x = 180;
+  p1.y = GROUND_Y;
+  p1.velocityX = 0;
+  p1.velocityY = 0;
+  p1.health = 100;
+  p1.attackCooldown = 0;
+  p1.attackFlash = 0;
+  p1.hitStun = 0;
+  p1.wasAttackPressed = false;
+  p1.wasKickPressed = false;
+  p1.wasJumpPressed = false;
+
+  p2.x = canvas.width - 220;
+  p2.y = GROUND_Y;
+  p2.velocityX = 0;
+  p2.velocityY = 0;
+  p2.health = 100;
+  p2.attackCooldown = 0;
+  p2.attackFlash = 0;
+  p2.hitStun = 0;
+  p2.wasAttackPressed = false;
+  p2.wasKickPressed = false;
+  p2.wasJumpPressed = false;
+
+  roundTimer = ROUND_TIME;
+  roundSecondsAccumulator = 0;
+  roundOver = false;
+  roundTextEl.textContent = `Round ${p1.roundsWon + p2.roundsWon + 1}`;
+  messageEl.textContent = 'Fight!';
+}
+
+function endRound(winner, reason) {
+  if (roundOver || gameOver) return;
+  roundOver = true;
+
+  if (winner) {
+    winner.roundsWon += 1;
+  }
+
+  messageEl.textContent = reason;
+
+  if (p1.roundsWon >= MAX_ROUNDS_TO_WIN || p2.roundsWon >= MAX_ROUNDS_TO_WIN) {
+    gameOver = true;
+    const champion = p1.roundsWon > p2.roundsWon ? p1 : p2;
+    messageEl.textContent = `${champion.name} wins the match! Press Restart Match.`;
+    roundTextEl.textContent = 'Match Over';
     return;
   }
 
-  feedbackEl.textContent = isCorrect
-    ? `✅ Correct! ${currentQuestion.explanation}`
-    : `❌ Not quite. ${currentQuestion.explanation}`;
-}
-
-function startQuestionTimer() {
-  stopTimer();
-  timeLeft = getTimeLimitForDifficulty(difficultySelect.value);
-  updateTimerText();
-
-  timerId = setInterval(() => {
-    timeLeft -= 1;
-    updateTimerText();
-
-    if (timeLeft <= 0) {
-      stopTimer();
-      lockAnswers();
-      revealAnswerAndFeedback(false, true);
+  window.setTimeout(() => {
+    if (!gameOver) {
+      resetFighters();
     }
-  }, 1000);
+  }, 1300);
 }
 
-function renderQuestion(payload) {
-  currentQuestion = payload;
-  card.classList.remove('hidden');
-  resetCard();
-  questionEl.textContent = payload.question;
+function handleTimer(dt) {
+  if (roundOver || gameOver) return;
 
-  payload.choices.forEach((choice, index) => {
-    const btn = document.createElement('button');
-    btn.className = 'answer-btn';
-    btn.textContent = choice;
-    btn.addEventListener('click', () => handleAnswer(index));
-    answersEl.appendChild(btn);
-  });
+  roundSecondsAccumulator += dt;
+  while (roundSecondsAccumulator >= 1) {
+    roundSecondsAccumulator -= 1;
+    roundTimer -= 1;
 
-  startQuestionTimer();
+    if (roundTimer <= 0) {
+      const winner = p1.health === p2.health ? null : (p1.health > p2.health ? p1 : p2);
+      if (!winner) {
+        messageEl.textContent = 'Time up! Draw round. Resetting...';
+        roundOver = true;
+        window.setTimeout(() => {
+          if (!gameOver) {
+            resetFighters();
+          }
+        }, 1200);
+      } else {
+        endRound(winner, `Time up! ${winner.name} takes the round.`);
+      }
+      break;
+    }
+  }
 }
 
-function handleAnswer(selectedIndex) {
-  if (!currentQuestion || !timerId) return;
+function gameLoop(now) {
+  const dt = Math.min((now - lastTick) / 1000, 0.033);
+  lastTick = now;
 
-  const isCorrect = selectedIndex === currentQuestion.answerIndex;
-  stopTimer();
-  lockAnswers();
+  handleInput(p1, p2);
+  handleInput(p2, p1);
 
-  if (isCorrect) {
-    score += 1;
-    updateScoreText();
+  if (!roundOver && !gameOver) {
+    updateFighter(p1, dt);
+    updateFighter(p2, dt);
+    updateFacing();
   }
 
-  revealAnswerAndFeedback(isCorrect);
+  handleTimer(dt);
+  updateHud();
+  draw();
+
+  requestAnimationFrame(gameLoop);
 }
 
-function generateQuestion() {
-  const question = pickQuestion(topicSelect.value, difficultySelect.value);
-  renderQuestion(question);
+function restartMatch() {
+  p1.roundsWon = 0;
+  p2.roundsWon = 0;
+  gameOver = false;
+  resetFighters();
+  updateHud();
 }
 
-function syncTimerDisplayToDifficulty() {
-  if (timerId) return;
-  timeLeft = getTimeLimitForDifficulty(difficultySelect.value);
-  updateTimerText();
-}
-
-function startGame(event) {
-  event.preventDefault();
-
-  const trimmedName = nameInput.value.trim();
-  const trimmedEmail = emailInput.value.trim();
-
-  if (!trimmedName || !trimmedEmail) {
-    loginFeedbackEl.className = 'feedback wrong';
-    loginFeedbackEl.textContent = 'Please enter both name and email.';
-    return;
+window.addEventListener('keydown', (event) => {
+  keys[event.code] = true;
+  if (['ArrowUp', 'ArrowLeft', 'ArrowRight'].includes(event.code)) {
+    event.preventDefault();
   }
+});
 
-  playerName = trimmedName;
-  loginFeedbackEl.textContent = '';
-  loginFeedbackEl.className = 'feedback';
+window.addEventListener('keyup', (event) => {
+  keys[event.code] = false;
+});
 
-  welcomeText.textContent = `Welcome, ${playerName}!`;
-  score = 0;
-  updateScoreText();
-  syncTimerDisplayToDifficulty();
+restartBtn.addEventListener('click', restartMatch);
 
-  loginSection.classList.add('hidden');
-  gameSection.classList.remove('hidden');
-}
-
-loginForm.addEventListener('submit', startGame);
-difficultySelect.addEventListener('change', syncTimerDisplayToDifficulty);
-generateBtn.addEventListener('click', generateQuestion);
+resetFighters();
+updateHud();
+requestAnimationFrame((t) => {
+  lastTick = t;
+  gameLoop(t);
+});

@@ -1,30 +1,31 @@
-# Trivia App (Static)
+# Arcade Clash (Browser Fighting Game)
 
-A fully static trivia app for learning basic web app development and immediate UI feedback.
+A lightweight 2D fighting game you can run locally in the browser. It is inspired by classic head-to-head fighters and built with plain HTML/CSS/JavaScript.
 
-## Features
+## Gameplay
 
-- Login form with **name** and **email** before gameplay.
-- Choose a category: Science, History, Sports, or Geography.
-- Choose a difficulty level:
-  - **Easy**: easier questions, **30 seconds** per question
-  - **Medium**: tougher than easy, **45 seconds** per question
-  - **Hard**: tougher than medium, **60 seconds** per question
-- 15 built-in questions per category, split by difficulty buckets.
-- One question shown at a time.
-- **Score counter** that increases by 1 only when the selected answer is correct.
-- Click an answer to instantly see:
-  - the correct answer in green
-  - all incorrect answers in red
-  - a short explanation
-- No backend/API required.
+- Local 2-player versus match on one keyboard.
+- Health bars, round timer, and best-of-3 rounds.
+- Punch, kick, jump, move, and block mechanics.
+- Knockout wins and time-based round decisions.
+
+## Controls
+
+### Player 1
+- Move: `A` / `D`
+- Jump: `W`
+- Punch: `F`
+- Kick: `G`
+- Block: `H`
+
+### Player 2
+- Move: `←` / `→`
+- Jump: `↑`
+- Punch: `K`
+- Kick: `L`
+- Block: `;`
 
 ## Run locally
-
-Because the app is static, you can run it in either of these ways:
-
-1. Open `public/index.html` directly in your browser.
-2. Or use any static file server, for example:
 
 ```bash
 npm start
