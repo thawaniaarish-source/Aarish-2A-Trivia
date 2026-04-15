@@ -12,17 +12,17 @@ body {
   min-height: 100vh;
   display: grid;
   place-items: center;
-  background: radial-gradient(circle at top, #2a1638, #130718 60%, #09060d 100%);
-  color: #f8e6ff;
+  background: linear-gradient(180deg, #d8e0e8, #bfcbd8 55%, #acb7c2);
+  color: #1f2933;
 }
 
 .game-shell {
   width: min(96vw, 1060px);
   padding: 1rem;
   border-radius: 16px;
-  background: rgba(26, 14, 33, 0.9);
-  border: 1px solid #5d2f77;
-  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.45);
+  background: rgba(241, 244, 247, 0.95);
+  border: 1px solid #8b96a3;
+  box-shadow: 0 8px 24px rgba(27, 39, 53, 0.2);
 }
 
 h1 {
@@ -31,7 +31,7 @@ h1 {
 
 .subtitle {
   margin: 0.35rem 0 1rem;
-  color: #f3d7ff;
+  color: #4b5563;
 }
 
 .hud {
@@ -66,39 +66,38 @@ h1 {
   margin: 0.2rem 0;
   font-size: 1.7rem;
   font-weight: 800;
-  color: #ffd369;
+  color: #7c3f00;
 }
 
 .health-track {
   width: min(38vw, 320px);
   height: 18px;
   border-radius: 999px;
-  border: 1px solid #cda2ff;
-  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid #9aa6b2;
+  background: #dde5ec;
   overflow: hidden;
 }
 
 .health-fill {
   height: 100%;
   width: 100%;
-  transition: width 140ms linear;
 }
 
 .health-fill.p1 {
-  background: linear-gradient(90deg, #39ff90, #4be5ff);
+  background: #2f7d57;
 }
 
 .health-fill.p2 {
-  background: linear-gradient(90deg, #ff6e9b, #ff9f43);
+  background: #8a3f2f;
 }
 
 #arena {
   width: 100%;
   height: auto;
   border-radius: 12px;
-  border: 1px solid #7d45a1;
+  border: 1px solid #7a8794;
   display: block;
-  background: #1a1031;
+  background: #c9d7e4;
 }
 
 button {
@@ -106,13 +105,13 @@ button {
   border: none;
   border-radius: 10px;
   padding: 0.45rem 0.7rem;
-  background: #8c3dff;
+  background: #3d5d7a;
   color: #fff;
   cursor: pointer;
 }
 
 button:hover {
-  filter: brightness(1.1);
+  background: #334f67;
 }
 
 .message {
@@ -121,7 +120,7 @@ button:hover {
   font-weight: 800;
   text-align: center;
   min-height: 1.6rem;
-  color: #ffd369;
+  color: #7c3f00;
 }
 
 .controls {
@@ -132,8 +131,8 @@ button:hover {
 }
 
 .controls article {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #e8edf2;
+  border: 1px solid #bcc7d1;
   border-radius: 10px;
   padding: 0.5rem 0.8rem;
 }
