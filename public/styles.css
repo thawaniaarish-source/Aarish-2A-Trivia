@@ -22,7 +22,17 @@ body {
 
 .subtitle {
   margin-top: -0.3rem;
+  margin-bottom: 0.35rem;
   color: #4b5563;
+}
+
+.mode-link {
+  margin: 0 0 1rem;
+  font-weight: 600;
+}
+
+.mode-link a {
+  color: #4338ca;
 }
 
 .auth-card {
